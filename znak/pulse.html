@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>МЕРЦ · Пульс</title>
+    <style>
+      :root {
+        color-scheme: light;
+        /* Палитра и размеры макета из задания 08; автономные страницы не грузят CSS сайта. */
+        --logo-flame: #a82319;
+        --logo-ink: #22262b;
+        --logo-ribbon: #fff;
+        --surface: #fff;
+        --soft: #f3f6fb;
+        --text: #22262b;
+        --muted: #4a5568;
+        --line: #d9e0ec;
+        --cycle: 6s;
+        --gap: 24px;
+        --radius: 16px;
+        --font: 16px;
+        --touch: 44px;
+        --chat: 56px;
+        --large: 240px;
+        --halo: radial-gradient(
+          ellipse,
+          rgb(168 35 25 / 22%),
+          rgb(168 35 25 / 8%) 46%,
+          transparent 72%
+        );
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--soft);
+        color: var(--text);
+        font:
+          var(--font)/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-inline-size: 1440px;
+        margin-inline: auto;
+        padding: clamp(16px, 3vw, 40px);
+      }
+      .controls {
+        block-size: 60px;
+      }
+      header {
+        margin-block-end: var(--gap);
+      }
+      h1 {
+        font-size: clamp(28px, 4vw, 42px);
+        line-height: calc(1em + 8px);
+        text-wrap: balance;
+        margin-block: 8px 16px;
+      }
+      h2 {
+        font-size: 24px;
+        margin-block: 0 8px;
+      }
+      p {
+        margin-block: 8px 16px;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 3px solid var(--logo-flame);
+        outline-offset: 4px;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 24px;
+      }
+      nav a {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--touch);
+      }
+      [aria-current] {
+        font-weight: 700;
+      }
+      button {
+        min-block-size: var(--touch);
+        padding: 8px 16px;
+        border: 1px solid var(--muted);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        cursor: pointer;
+        margin-block-start: 8px;
+      }
+      .eyebrow,
+      .motion-note,
+      .background-label {
+        color: var(--muted);
+      }
+      .eyebrow {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+      }
+      .motion-note {
+        font-size: 14px;
+      }
+      .comparison {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--gap);
+      }
+      .description {
+        min-block-size: 72px;
+      }
+      .samples {
+        display: grid;
+        gap: var(--gap);
+      }
+      .detail .samples {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .sample {
+        padding: var(--gap);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+      .white {
+        background: var(--surface);
+      }
+      .soft {
+        background: var(--soft);
+      }
+      .background-label {
+        margin-block: 0 16px;
+        font-size: 14px;
+      }
+      .large {
+        display: grid;
+        justify-items: center;
+        gap: 16px;
+      }
+      .large > span:last-child,
+      .small {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .small {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-block-start: var(--gap);
+      }
+      .header-example,
+      .chat-example {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: end;
+        gap: 12px;
+      }
+      .chat-circle {
+        display: grid;
+        place-items: center;
+        inline-size: var(--chat);
+        block-size: var(--chat);
+        border-radius: 50%;
+        background: var(--surface);
+        box-shadow: 0 0 0 1px var(--line);
+      }
+      .mark {
+        display: inline-grid;
+        position: relative;
+        flex: none;
+        isolation: isolate;
+        line-height: 0;
+      }
+      .mark svg {
+        display: block;
+        position: relative;
+        overflow: visible;
+      }
+      /* Центр рисунка x=80, центр viewBox x=84: поправка постоянна только внутри круга. */
+      .chat-circle .mark {
+        transform: translateX(1.333333px);
+      }
+      .halo {
+        position: absolute;
+        inset: -8%;
+        background: var(--halo);
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .split-dove {
+        opacity: 0;
+      }
+      @media (max-width: 1050px) {
+        .comparison {
+          grid-template-columns: 1fr;
+        }
+        .description {
+          min-block-size: 0;
+        }
+        .comparison .samples {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 640px) {
+        .detail .samples,
+        .comparison .samples {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mark :is(.wing, .head, .fl-c, .fl-r, .fl-l, .fl-s) {
+          transform: none !important;
+        }
+        .mark .static-dove {
+          opacity: 1 !important;
+        }
+        .mark :is(.split-dove, .halo) {
+          opacity: 0 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">МЕРЦ / движение знака</p>
+        <h1>Пульс</h1>
+        <p>Тёплый ореол медленно появляется и гаснет. Знак неподвижен.</p>
+        <nav aria-label="Варианты">
+          <a href="index.html">Все варианты</a><a href="dove.html">Голубь</a
+          ><a href="flame.html">Пламя</a><a href="pulse.html" aria-current="page">Пульс</a>
+        </nav>
+        <div class="controls">
+          <button type="button" id="toggle" aria-pressed="false" hidden>Пауза движения</button>
+        </div>
+        <p class="motion-note">
+          При уменьшении движения в настройках устройства знак остаётся статичным.
+        </p>
+      </header>
+      <div class="detail">
+        <article>
+          <h2><a href="pulse.html">Пульс</a></h2>
+          <div class="samples">
+            <section class="sample white" aria-label="Белый фон">
+              <p class="background-label">Белый фон</p>
+              <div class="large">
+                <span class="mark pulse" data-motion="pulse"
+                  ><span class="halo" aria-hidden="true"></span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="240"
+                    height="240"
+                    viewBox="0 0 168 168"
+                    role="img"
+                    aria-label="Знак МЕРЦ"
+                  >
+                    <path
+                      class="rib-w1"
+                      fill="var(--logo-ribbon)"
+                      d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                    ></path>
+                    <path
+                      class="arc-l"
+                      fill="var(--logo-ink)"
+                      d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                    ></path>
+                    <path
+                      class="arc-r"
+                      fill="var(--logo-ink)"
+                      d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                    ></path>
+                    <path
+                      class="fl-r"
+                      fill="var(--logo-flame)"
+                      d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                    ></path>
+                    <path
+                      class="fl-l"
+                      fill="var(--logo-flame)"
+                      d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                    ></path>
+                    <path
+                      class="fl-c"
+                      fill="var(--logo-flame)"
+                      d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                    ></path>
+                    <path
+                      class="rib-w2"
+                      fill="var(--logo-ribbon)"
+                      d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                    ></path>
+                    <path
+                      class="in-1"
+                      fill="var(--logo-ink)"
+                      d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                    ></path>
+                    <path
+                      class="in-2"
+                      fill="var(--logo-ink)"
+                      d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                    ></path>
+                    <path
+                      class="fl-s"
+                      fill="var(--logo-flame)"
+                      d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                    ></path>
+                    <path
+                      class="in-3"
+                      fill="var(--logo-ink)"
+                      d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                    ></path>
+                    <path
+                      class="dove"
+                      fill="var(--logo-ribbon)"
+                      stroke="var(--logo-ribbon)"
+                      stroke-width="1.2"
+                      stroke-linejoin="round"
+                      d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                    ></path></svg></span
+                ><span>240 px</span>
+              </div>
+              <div class="small">
+                <div class="header-example">
+                  <span class="mark pulse" data-motion="pulse"
+                    ><span class="halo" aria-hidden="true"></span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="44"
+                      height="44"
+                      viewBox="0 0 168 168"
+                      role="img"
+                      aria-label="Знак МЕРЦ"
+                    >
+                      <path
+                        class="rib-w1"
+                        fill="var(--logo-ribbon)"
+                        d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                      ></path>
+                      <path
+                        class="arc-l"
+                        fill="var(--logo-ink)"
+                        d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                      ></path>
+                      <path
+                        class="arc-r"
+                        fill="var(--logo-ink)"
+                        d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                      ></path>
+                      <path
+                        class="fl-r"
+                        fill="var(--logo-flame)"
+                        d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                      ></path>
+                      <path
+                        class="fl-l"
+                        fill="var(--logo-flame)"
+                        d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                      ></path>
+                      <path
+                        class="fl-c"
+                        fill="var(--logo-flame)"
+                        d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                      ></path>
+                      <path
+                        class="rib-w2"
+                        fill="var(--logo-ribbon)"
+                        d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                      ></path>
+                      <path
+                        class="in-1"
+                        fill="var(--logo-ink)"
+                        d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                      ></path>
+                      <path
+                        class="in-2"
+                        fill="var(--logo-ink)"
+                        d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                      ></path>
+                      <path
+                        class="fl-s"
+                        fill="var(--logo-flame)"
+                        d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                      ></path>
+                      <path
+                        class="in-3"
+                        fill="var(--logo-ink)"
+                        d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                      ></path>
+                      <path
+                        class="dove"
+                        fill="var(--logo-ribbon)"
+                        stroke="var(--logo-ribbon)"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                        d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                      ></path></svg></span
+                  ><span>Шапка · 44 px</span>
+                </div>
+                <div class="chat-example">
+                  <span class="chat-circle"
+                    ><span class="mark pulse" data-motion="pulse"
+                      ><span class="halo" aria-hidden="true"></span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="56"
+                        height="56"
+                        viewBox="0 0 168 168"
+                        role="img"
+                        aria-label="Знак МЕРЦ"
+                      >
+                        <path
+                          class="rib-w1"
+                          fill="var(--logo-ribbon)"
+                          d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                        ></path>
+                        <path
+                          class="arc-l"
+                          fill="var(--logo-ink)"
+                          d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                        ></path>
+                        <path
+                          class="arc-r"
+                          fill="var(--logo-ink)"
+                          d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                        ></path>
+                        <path
+                          class="fl-r"
+                          fill="var(--logo-flame)"
+                          d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                        ></path>
+                        <path
+                          class="fl-l"
+                          fill="var(--logo-flame)"
+                          d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                        ></path>
+                        <path
+                          class="fl-c"
+                          fill="var(--logo-flame)"
+                          d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                        ></path>
+                        <path
+                          class="rib-w2"
+                          fill="var(--logo-ribbon)"
+                          d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                        ></path>
+                        <path
+                          class="in-1"
+                          fill="var(--logo-ink)"
+                          d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                        ></path>
+                        <path
+                          class="in-2"
+                          fill="var(--logo-ink)"
+                          d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                        ></path>
+                        <path
+                          class="fl-s"
+                          fill="var(--logo-flame)"
+                          d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                        ></path>
+                        <path
+                          class="in-3"
+                          fill="var(--logo-ink)"
+                          d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                        ></path>
+                        <path
+                          class="dove"
+                          fill="var(--logo-ribbon)"
+                          stroke="var(--logo-ribbon)"
+                          stroke-width="1.2"
+                          stroke-linejoin="round"
+                          d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                        ></path></svg></span></span
+                  ><span>Чат · 56 px</span>
+                </div>
+              </div>
+            </section>
+            <section class="sample soft" aria-label="Светлый фон">
+              <p class="background-label">Светлый фон</p>
+              <div class="large">
+                <span class="mark pulse" data-motion="pulse"
+                  ><span class="halo" aria-hidden="true"></span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="240"
+                    height="240"
+                    viewBox="0 0 168 168"
+                    role="img"
+                    aria-label="Знак МЕРЦ"
+                  >
+                    <path
+                      class="rib-w1"
+                      fill="var(--logo-ribbon)"
+                      d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                    ></path>
+                    <path
+                      class="arc-l"
+                      fill="var(--logo-ink)"
+                      d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                    ></path>
+                    <path
+                      class="arc-r"
+                      fill="var(--logo-ink)"
+                      d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                    ></path>
+                    <path
+                      class="fl-r"
+                      fill="var(--logo-flame)"
+                      d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                    ></path>
+                    <path
+                      class="fl-l"
+                      fill="var(--logo-flame)"
+                      d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                    ></path>
+                    <path
+                      class="fl-c"
+                      fill="var(--logo-flame)"
+                      d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                    ></path>
+                    <path
+                      class="rib-w2"
+                      fill="var(--logo-ribbon)"
+                      d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                    ></path>
+                    <path
+                      class="in-1"
+                      fill="var(--logo-ink)"
+                      d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                    ></path>
+                    <path
+                      class="in-2"
+                      fill="var(--logo-ink)"
+                      d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                    ></path>
+                    <path
+                      class="fl-s"
+                      fill="var(--logo-flame)"
+                      d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                    ></path>
+                    <path
+                      class="in-3"
+                      fill="var(--logo-ink)"
+                      d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                    ></path>
+                    <path
+                      class="dove"
+                      fill="var(--logo-ribbon)"
+                      stroke="var(--logo-ribbon)"
+                      stroke-width="1.2"
+                      stroke-linejoin="round"
+                      d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                    ></path></svg></span
+                ><span>240 px</span>
+              </div>
+              <div class="small">
+                <div class="header-example">
+                  <span class="mark pulse" data-motion="pulse"
+                    ><span class="halo" aria-hidden="true"></span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="44"
+                      height="44"
+                      viewBox="0 0 168 168"
+                      role="img"
+                      aria-label="Знак МЕРЦ"
+                    >
+                      <path
+                        class="rib-w1"
+                        fill="var(--logo-ribbon)"
+                        d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                      ></path>
+                      <path
+                        class="arc-l"
+                        fill="var(--logo-ink)"
+                        d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                      ></path>
+                      <path
+                        class="arc-r"
+                        fill="var(--logo-ink)"
+                        d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                      ></path>
+                      <path
+                        class="fl-r"
+                        fill="var(--logo-flame)"
+                        d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                      ></path>
+                      <path
+                        class="fl-l"
+                        fill="var(--logo-flame)"
+                        d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                      ></path>
+                      <path
+                        class="fl-c"
+                        fill="var(--logo-flame)"
+                        d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                      ></path>
+                      <path
+                        class="rib-w2"
+                        fill="var(--logo-ribbon)"
+                        d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                      ></path>
+                      <path
+                        class="in-1"
+                        fill="var(--logo-ink)"
+                        d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                      ></path>
+                      <path
+                        class="in-2"
+                        fill="var(--logo-ink)"
+                        d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                      ></path>
+                      <path
+                        class="fl-s"
+                        fill="var(--logo-flame)"
+                        d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                      ></path>
+                      <path
+                        class="in-3"
+                        fill="var(--logo-ink)"
+                        d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                      ></path>
+                      <path
+                        class="dove"
+                        fill="var(--logo-ribbon)"
+                        stroke="var(--logo-ribbon)"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                        d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                      ></path></svg></span
+                  ><span>Шапка · 44 px</span>
+                </div>
+                <div class="chat-example">
+                  <span class="chat-circle"
+                    ><span class="mark pulse" data-motion="pulse"
+                      ><span class="halo" aria-hidden="true"></span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="56"
+                        height="56"
+                        viewBox="0 0 168 168"
+                        role="img"
+                        aria-label="Знак МЕРЦ"
+                      >
+                        <path
+                          class="rib-w1"
+                          fill="var(--logo-ribbon)"
+                          d="M73 118C56 128 55 141 61 153C63 157 64 161 64 163L70 164C66 145 73 130 95 121Z"
+                        ></path>
+                        <path
+                          class="arc-l"
+                          fill="var(--logo-ink)"
+                          d="M51 29C23 44 10 68 10 94C10 130 31 155 64 163C64 151 59 145 46 138C21 124 12 104 16 80C19 60 32 42 51 29Z"
+                        ></path>
+                        <path
+                          class="arc-r"
+                          fill="var(--logo-ink)"
+                          d="M107 29C135 45 150 72 150 98C150 135 123 161 85 164C83 151 94 145 111 140C139 130 152 101 144 73C138 54 124 39 107 29Z"
+                        ></path>
+                        <path
+                          class="fl-r"
+                          fill="var(--logo-flame)"
+                          d="M107 29C135 45 145 67 145 94C145 123 127 143 102 151C90 155 85 158 85 164C82 151 85 144 99 139C124 132 138 116 140 94C143 67 129 44 107 29Z"
+                        ></path>
+                        <path
+                          class="fl-l"
+                          fill="var(--logo-flame)"
+                          d="M26 67C20 86 29 107 43 118C49 123 55 125 64 125C57 131 56 137 58 145C33 135 18 112 23 82Z"
+                        ></path>
+                        <path
+                          class="fl-c"
+                          fill="var(--logo-flame)"
+                          d="M73 2C89 9 94 27 88 45C85 54 89 58 95 54C100 51 94 41 98 32C97 43 103 47 109 52C118 61 123 73 120 86C118 103 106 112 88 119C72 125 64 133 64 148C62 134 65 122 78 112C91 102 96 91 91 79C91 70 83 62 79 52C76 45 75 39 78 33C66 45 68 57 74 64C62 54 61 46 66 35C74 23 80 12 73 2Z"
+                        ></path>
+                        <path
+                          class="rib-w2"
+                          fill="var(--logo-ribbon)"
+                          d="M78 34C71 46 76 56 83 66C88 73 90 80 89 87C86 75 81 71 74 65C65 58 68 44 78 34Z"
+                        ></path>
+                        <path
+                          class="in-1"
+                          fill="var(--logo-ink)"
+                          d="M68 23C50 42 57 57 73 67C84 74 90 84 88 97C86 84 81 80 69 74C48 65 43 44 68 23Z"
+                        ></path>
+                        <path
+                          class="in-2"
+                          fill="var(--logo-ink)"
+                          d="M53 42C31 61 30 92 44 110C52 120 64 123 70 116C64 121 53 124 44 126C56 130 72 121 76 111C80 100 70 95 60 89C49 82 46 71 47 61C51 69 57 75 64 77C50 65 48 54 53 42Z"
+                        ></path>
+                        <path
+                          class="fl-s"
+                          fill="var(--logo-flame)"
+                          d="M47 86C55 96 66 95 69 104C73 110 66 117 63 119C53 116 47 108 47 98Z"
+                        ></path>
+                        <path
+                          class="in-3"
+                          fill="var(--logo-ink)"
+                          d="M117 104C109 115 99 119 89 122C71 127 65 139 69 163C72 164 75 164 79 164C77 149 85 142 100 137C124 129 136 110 136 86C136 82 135 79 133 76C137 100 121 116 101 121C109 116 114 110 117 104Z"
+                        ></path>
+                        <path
+                          class="dove"
+                          fill="var(--logo-ribbon)"
+                          stroke="var(--logo-ribbon)"
+                          stroke-width="1.2"
+                          stroke-linejoin="round"
+                          d="M53 42C49 57 58 69 71 76C82 82 87 88 87 97C88 85 94 73 102 72C106 71 110 73 112 76C105 75 103 81 103 87C102 105 87 116 72 123C66 127 62 134 61 140C59 134 61 129 64 126C57 131 50 132 45 129C61 127 74 118 75 109C77 99 66 97 57 90C49 84 46 73 47 62C51 69 57 74 64 77C52 66 48 54 53 42Z"
+                        ></path></svg></span></span
+                  ><span>Чат · 56 px</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <script>
+      /* global window, document, matchMedia, IntersectionObserver, requestAnimationFrame, cancelAnimationFrame */
+      /* Пишем только transform/opacity: CSS-анимация opacity в Chromium меняет
+   антиалиасинг белого силуэта даже в кадре покоя из-за отдельного слоя. */
+      (() => {
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+        const button = document.getElementById('toggle');
+        const marks = [...document.querySelectorAll('[data-motion]')].map((element) => ({
+          element,
+          visible: false,
+          elapsed: 0,
+          parts: Object.fromEntries(
+            [
+              'wing',
+              'head',
+              'static-dove',
+              'split-dove',
+              'fl-c',
+              'fl-r',
+              'fl-l',
+              'fl-s',
+              'halo',
+            ].map((name) => [name, element.querySelector(`.${name}`)]),
+          ),
+        }));
+        let paused = false,
+          seeking = false,
+          raf = 0,
+          last = 0,
+          painted = 0;
+        window.TOTAL = 6000; // Медленный цикл, в рамках брифа задания 08.
+        // Косинус даёт нулевую скорость в каждой опорной позе и на стыке петли.
+        const pose = (phase, keys) => {
+          const end = keys.findIndex(([time]) => time >= phase);
+          if (end <= 0) return keys[0][1];
+          const [startTime, startValue] = keys[end - 1];
+          const [endTime, endValue] = keys[end];
+          const easing =
+            (1 - Math.cos((Math.PI * (phase - startTime)) / (endTime - startTime))) / 2;
+          return startValue + (endValue - startValue) * easing;
+        };
+        const put = (element, property, value) => {
+          if (!element) return;
+          if (property === 'transform') {
+            if (!value) element.removeAttribute('transform');
+            else if (element.getAttribute('transform') !== value)
+              element.setAttribute('transform', value);
+          } else if (element.style[property] !== value) element.style[property] = value;
+        };
+        // Голубь: прежние пути в трёх перекрывающихся clipPath, неподвижное тело.
+        const wingPoses = [
+          [0, 0],
+          [0.12, 0],
+          [0.38, 1],
+          [0.64, -0.5],
+          [0.88, 0],
+          [1, 0],
+        ];
+        const headPoses = [
+          [0, 0],
+          [0.2, 0],
+          [0.48, 1],
+          [0.68, -0.325],
+          [0.86, 0],
+          [1, 0],
+        ];
+        const renderDove = (part, p) => {
+          const wing = pose(p, wingPoses),
+            head = pose(p, headPoses);
+          const moving = wing !== 0 || head !== 0;
+          put(part['static-dove'], 'opacity', moving ? '0' : '1');
+          put(part['split-dove'], 'opacity', moving ? '1' : '0');
+          put(
+            part.wing,
+            'transform',
+            wing
+              ? `translate(85 97) scale(${1 - 0.05 * wing} ${1 - 0.03 * wing}) skewX(${-1.2 * wing}) translate(-85 -97)`
+              : '',
+          );
+          put(part.head, 'transform', head ? `rotate(${2 * head} 91 91)` : '');
+        };
+        // Основания из SVG; амплитуды 1,8–3,5% и ≤0,8°, выбранные для спокойного движения.
+        const flames = [
+          ['fl-c', 70, 148, 0.32, 0.68, 0.025, 0.8],
+          ['fl-r', 85, 164, 0.4, 0.76, 0.018, -0.7],
+          ['fl-l', 58, 145, 0.46, 0.78, 0.025, 0.8],
+          ['fl-s', 60, 119, 0.35, 0.7, 0.035, -0.6],
+        ];
+        const renderFlame = (part, p) => {
+          for (const [name, x, y, rise, fall, stretch, skew] of flames) {
+            const breath = pose(p, [
+              [0, 0],
+              [rise, 1],
+              [fall, -0.4],
+              [1, 0],
+            ]);
+            put(
+              part[name],
+              'transform',
+              breath
+                ? `translate(${x} ${y}) scale(1 ${1 + stretch * breath}) skewX(${skew * breath}) translate(${-x} ${-y})`
+                : '',
+            );
+          }
+        };
+        const render = (mark, ms) => {
+          const p = reduced.matches
+            ? 0
+            : (((ms % window.TOTAL) + window.TOTAL) % window.TOTAL) / window.TOTAL;
+          if (mark.element.dataset.motion === 'dove') renderDove(mark.parts, p);
+          else if (mark.element.dataset.motion === 'flame') renderFlame(mark.parts, p);
+          else
+            put(
+              mark.parts.halo,
+              'opacity',
+              String(
+                pose(p, [
+                  [0, 0],
+                  [0.5, 1],
+                  [1, 0],
+                ]),
+              ),
+            );
+        };
+        const running = (mark) =>
+          mark.visible && !document.hidden && !reduced.matches && !paused && !seeking;
+        const tick = (now) => {
+          raf = 0;
+          const dt = last ? Math.min(now - last, 100) : 0;
+          last = now;
+          for (const mark of marks)
+            if (running(mark)) mark.elapsed = (mark.elapsed + dt) % window.TOTAL;
+          if (now - painted >= 1000 / 30) {
+            // 30 кадров/с достаточно для спокойного движения.
+            for (const mark of marks) if (running(mark)) render(mark, mark.elapsed);
+            painted = now;
+          }
+          if (marks.some(running)) raf = requestAnimationFrame(tick);
+          else last = 0;
+        };
+        const sync = () => {
+          if (reduced.matches)
+            for (const mark of marks) {
+              mark.elapsed = 0;
+              render(mark, 0);
+            }
+          button.hidden = reduced.matches;
+          button.textContent = paused ? 'Продолжить движение' : 'Пауза движения';
+          button.setAttribute('aria-pressed', String(paused));
+          if (marks.some(running) && !raf) {
+            last = 0;
+            raf = requestAnimationFrame(tick);
+          } else if (!marks.some(running) && raf) {
+            cancelAnimationFrame(raf);
+            raf = last = 0;
+          }
+        };
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries)
+              marks.find((mark) => mark.element === entry.target).visible = entry.isIntersecting;
+            sync();
+          });
+          marks.forEach((mark) => observer.observe(mark.element));
+        }
+        button.addEventListener('click', () => {
+          paused = !paused;
+          seeking = false;
+          sync();
+        });
+        document.addEventListener('visibilitychange', () => {
+          last = 0;
+          sync();
+        });
+        reduced.addEventListener('change', sync);
+        window.seek = (ms) => {
+          if (!Number.isFinite(ms)) throw new TypeError('Время кадра должно быть конечным числом');
+          seeking = true;
+          sync();
+          for (const mark of marks) {
+            mark.elapsed = ms;
+            render(mark, ms);
+          }
+        };
+        window.motionState = () => marks.map(({ elapsed }) => elapsed);
+        marks.forEach((mark) => render(mark, 0));
+        sync();
+      })();
+    </script>
+  </body>
+</html>
