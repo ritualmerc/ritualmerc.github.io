@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/first-hours-client.BG4kkFMy.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`first-hours`,()=>t(()=>import(`./first-hours-client.BG4kkFMy.js`),__vite__mapDeps([0,1])));
