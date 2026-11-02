@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/share-client.CL8Lz1dc.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`share`,()=>t(()=>import(`./share-client.CL8Lz1dc.js`),__vite__mapDeps([0,1])));

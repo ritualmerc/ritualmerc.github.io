@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/tabs-client.9DeHvNfM.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`tabs`,()=>t(()=>import(`./tabs-client.9DeHvNfM.js`),__vite__mapDeps([0,1])));

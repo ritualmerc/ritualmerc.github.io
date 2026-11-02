@@ -1,0 +1,1 @@
+import{i as e,t}from"./drawer.CqWsb1Fa.js";document.addEventListener(`click`,n=>{let r=n.target.closest(`[data-open-callback]`);if(!r)return;n.preventDefault();let i=document.querySelector(`#callback-sheet input[name=button]`);i&&(i.value=r.dataset.openCallback||`sheet`),t(`chat-drawer`),e(`callback-sheet`)});

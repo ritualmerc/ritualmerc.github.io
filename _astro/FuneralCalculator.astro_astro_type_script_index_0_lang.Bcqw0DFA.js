@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/calculator-client.wGkr0ObR.js","_astro/format.9ItjHRJH.js","_astro/city.CWkzZheA.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`calculator`,()=>t(()=>import(`./calculator-client.wGkr0ObR.js`),__vite__mapDeps([0,1,2,3])));
