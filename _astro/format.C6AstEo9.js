@@ -1,0 +1,1 @@
+import{t as e}from"./city.UF4d0SQK.js";function t(t){if(!Number.isFinite(t)||t<0)throw RangeError(`Сумма должна быть конечным неотрицательным числом`);let n=Number.isInteger(t)?0:2;return new Intl.NumberFormat(e.locale,{minimumFractionDigits:n,maximumFractionDigits:n}).format(t).replaceAll(`\xA0`,` `)+`\xA0₽`}export{t};
