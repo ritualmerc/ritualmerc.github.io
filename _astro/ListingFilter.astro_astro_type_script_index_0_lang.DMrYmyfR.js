@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/listing-client.CjyRI6p9.js","_astro/search.iKbj5aCG.js","_astro/drawer.CqWsb1Fa.js","_astro/dom.lA1j3Y-6.js","_astro/preload-helper.Dy2mSaY4.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`listing`,()=>t(()=>import(`./listing-client.CjyRI6p9.js`),__vite__mapDeps([0,1,2,3,4])));

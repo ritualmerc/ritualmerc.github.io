@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/search-client.D1idJt7o.js","_astro/search.iKbj5aCG.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`search`,()=>t(()=>import(`./search-client.D1idJt7o.js`),__vite__mapDeps([0,1,2])));
