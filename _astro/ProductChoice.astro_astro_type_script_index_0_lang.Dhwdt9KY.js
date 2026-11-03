@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/product-choice-client.BQXI7cs-.js","_astro/cart.DB1bvPJM.js","_astro/dom.lA1j3Y-6.js"])))=>i.map(i=>d[i]);
+import{n as e,t}from"./preload-helper.Dy2mSaY4.js";e(`product-choice`,()=>t(()=>import(`./product-choice-client.BQXI7cs-.js`),__vite__mapDeps([0,1,2])));
